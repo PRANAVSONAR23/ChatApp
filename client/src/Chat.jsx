@@ -25,7 +25,7 @@ export default function Chat() {
 useEffect(() => {
   if (selectedUserId) {
     const connectToWs = () => {
-      const socket = new WebSocket('ws://localhost:4000');
+      const socket = new WebSocket('ws://https://chatapp-l18d.onrender.com');
 
       
 
