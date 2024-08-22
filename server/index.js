@@ -9,8 +9,9 @@ const User = require('./models/User');
 const Message = require('./models/Message');
 const ws = require('ws');
 const fs = require('fs');
+const path = require('path');
 
-dotenv.config();
+dotenv.config({ path: path.resolve(__dirname, '.env') });
 
 
 const connectDB = async () => {
@@ -28,16 +29,32 @@ connectDB();
 
 const jwtSecret = process.env.JWT_SECRET;
 const bcryptSalt = bcrypt.genSaltSync(10);
-const PORT=4000;
+const PORT=process.env.PORT||4000;
 
 const app = express();
-app.use('/uploads', express.static(__dirname + '/uploads'));
+// app.use('/uploads', express.static(__dirname + '/uploads'));
 app.use(express.json());
 app.use(cookieParser());
 app.use(cors({  
   credentials: true,
   origin: process.env.CLIENT_URL,
 }));
+
+
+
+//--------deployment---------//
+
+const __dirname1 = path.resolve();
+app.use(express.static(path.join(__dirname1,"/client/dist")))
+
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname1, "client", "dist", "index.html"));
+});
+
+
+//---------------//
+
+
 
 async function getUserDataFromRequest(req) {
   return new Promise((resolve, reject) => {
@@ -67,9 +84,15 @@ app.get('/messages/:userId', async (req,res) => {
   res.json(messages);
 });
 
-app.get('/people', async (req,res) => {
-  const users = await User.find({}, {'_id':1,username:1});
-  res.json(users);
+app.get('/people', async (req, res) => {
+  try {
+    const users = await User.find({}, { '_id': 1, username: 1 });
+    console.log("Users fetched:", users);
+    res.json(users);
+  } catch (error) {
+    console.error("Error fetching users:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
 });
 
 app.get('/profile', (req,res) => {
@@ -123,7 +146,9 @@ app.post('/register', async (req,res) => {
   }
 });
 
-const server = app.listen(PORT);
+const server = app.listen(PORT,()=>{
+  console.log(`Server is running on port ${PORT}`);
+});
 
 const wss = new ws.WebSocketServer({server});
 wss.on('connection', (connection, req) => {

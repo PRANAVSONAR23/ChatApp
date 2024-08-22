@@ -139,9 +139,9 @@ useEffect(() => {
 
   useEffect(() => {
     axios.get('/people').then(res => {
-      const offlinePeopleArr = res.data
+      const offlinePeopleArr = Array.isArray(res.data) ?res.data
         .filter(p => p._id !== id)
-        .filter(p => !Object.keys(onlinePeople).includes(p._id));
+        .filter(p => !Object.keys(onlinePeople).includes(p._id)):[];
       const offlinePeople = {};
       offlinePeopleArr.forEach(p => {
         offlinePeople[p._id] = p;
