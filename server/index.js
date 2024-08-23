@@ -9,9 +9,8 @@ const User = require('./models/User');
 const Message = require('./models/Message');
 const ws = require('ws');
 const fs = require('fs');
-const path = require('path');
 
-dotenv.config({ path: path.resolve(__dirname, '.env') });
+dotenv.config();
 
 
 const connectDB = async () => {
@@ -32,29 +31,13 @@ const bcryptSalt = bcrypt.genSaltSync(10);
 const PORT=process.env.PORT||4000;
 
 const app = express();
-// app.use('/uploads', express.static(__dirname + '/uploads'));
+app.use('/uploads', express.static(__dirname + '/uploads'));
 app.use(express.json());
 app.use(cookieParser());
 app.use(cors({  
   credentials: true,
-  origin: "https://chatapp-l18d.onrender.com",
+  origin: "http://localhost:5173"
 }));
-
-
-
-//--------deployment---------//
-
-const __dirname1 = path.resolve();
-app.use(express.static(path.join(__dirname1,"/client/dist")))
-
-app.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname1, "client", "dist", "index.html"));
-});
-
-
-//---------------//
-
-
 
 async function getUserDataFromRequest(req) {
   return new Promise((resolve, reject) => {
@@ -84,15 +67,9 @@ app.get('/messages/:userId', async (req,res) => {
   res.json(messages);
 });
 
-app.get('/people', async (req, res) => {
-  try {
-    const users = await User.find({}, { '_id': 1, username: 1 });
-    console.log("Users fetched:", users);
-    res.json(users);
-  } catch (error) {
-    console.error("Error fetching users:", error);
-    res.status(500).json({ error: "Internal server error" });
-  }
+app.get('/people', async (req,res) => {
+  const users = await User.find({}, {'_id':1,username:1});
+  res.json(users);
 });
 
 app.get('/profile', (req,res) => {

@@ -25,7 +25,7 @@ export default function Chat() {
 useEffect(() => {
   if (selectedUserId) {
     const connectToWs = () => {
-      const socket = new WebSocket('ws://https://chatapp-l18d.onrender.com');
+      const socket = new WebSocket('ws://localhost:4000');
 
       
 
@@ -139,9 +139,9 @@ useEffect(() => {
 
   useEffect(() => {
     axios.get('/people').then(res => {
-      const offlinePeopleArr = Array.isArray(res.data) ?res.data
+      const offlinePeopleArr = res.data
         .filter(p => p._id !== id)
-        .filter(p => !Object.keys(onlinePeople).includes(p._id)):[];
+        .filter(p => !Object.keys(onlinePeople).includes(p._id));
       const offlinePeople = {};
       offlinePeopleArr.forEach(p => {
         offlinePeople[p._id] = p;
